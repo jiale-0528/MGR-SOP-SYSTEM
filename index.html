@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>MGR SOP SYSTEM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Login/Register Screen -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-background">
+            <img src="images/background.png" alt="Background" class="auth-bg-image" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+            <div class="auth-bg-overlay"></div>
+        </div>
+        <div class="auth-container">
+            <div class="logo-container">
+                <img src="images/mgr-logo.png" alt="MGR Logo" class="auth-logo" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                <h1>MGR SOP SYSTEM</h1>
+            </div>
+            
+            <div id="login-form" class="auth-form active">
+                <h2>登录</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Agent Code</label>
+                        <input type="text" id="loginCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> 密码</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">登录</button>
+                    <p class="auth-switch">
+                        还没有账号？ <a href="#" id="showRegister">立即注册</a>
+                    </p>
+                    <p class="auth-switch">
+                        <a href="#" id="showForgotPassword">忘记密码？</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div id="register-form" class="auth-form">
+                <h2>注册</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Agent Name</label>
+                        <input type="text" id="registerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> Agent Code</label>
+                        <input type="text" id="registerCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> 设置密码</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> 确认密码</label>
+                        <input type="password" id="registerConfirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn-primary">注册并保存</button>
+                    <p class="auth-switch">
+                        已有账号？ <a href="#" id="showLogin">立即登录</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div id="forgot-password-form" class="auth-form">
+                <h2>更改密码</h2>
+                <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 14px;">
+                    请输入您的Agent Code并设置新密码
+                </p>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> Agent Code</label>
+                        <input type="text" id="forgotCode" required placeholder="请输入您的Agent Code">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> 新密码</label>
+                        <input type="password" id="forgotNewPassword" required placeholder="请输入新密码（至少4位）" minlength="4">
+                        <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">密码长度至少为4位</small>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> 确认新密码</label>
+                        <input type="password" id="forgotConfirmPassword" required placeholder="请再次输入新密码" minlength="4">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> 更改密码
+                    </button>
+                    <p class="auth-switch">
+                        <a href="#" id="backToLogin">返回登录</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-screen" class="screen">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="images/mgr-logo.png" alt="MGR Logo" class="nav-logo" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                <span>MGR SOP SYSTEM</span>
+            </div>
+            <div class="nav-actions">
+            </div>
+            <div class="nav-user">
+                <span id="currentAgentName"></span>
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> 登出</button>
+            </div>
+        </nav>
+
+        <!-- Back to Home Button (below navbar) -->
+        <div class="back-to-home-container" style="display: none;">
+            <button id="backToHomeBtn" class="btn-back">
+                <i class="fas fa-arrow-left"></i> 返回首页
+            </button>
+        </div>
+
+        <!-- Homepage -->
+        <div id="homepage" class="page active">
+            <div class="homepage-content">
+                <div class="homepage-logo">
+                    <img src="images/mgr-logo.png" alt="MGR Logo" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                </div>
+                <h1 class="homepage-title">MGR SOP SYSTEM</h1>
+                <div class="homepage-nav">
+                    <button class="nav-card" data-page="goals">
+                        <i class="fas fa-bullseye"></i>
+                        <h3>业绩目标评估</h3>
+                    </button>
+                    <button class="nav-card" data-page="customers">
+                        <i class="fas fa-users"></i>
+                        <h3>客户名单管理</h3>
+                    </button>
+                    <button class="nav-card" data-page="visits">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>行动策略管理</h3>
+                    </button>
+                    <button class="nav-card" data-page="reminders">
+                        <i class="fas fa-bell"></i>
+                        <h3>注意事项</h3>
+                    </button>
+                    <button class="nav-card" data-page="tools">
+                        <i class="fas fa-tools"></i>
+                        <h3>小工具</h3>
+                    </button>
+                    <button class="nav-card" data-page="quadrant">
+                        <i class="fas fa-th"></i>
+                        <h3>四宫格</h3>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 1: Performance Goals -->
+        <div id="goals" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-bullseye"></i> 个人业绩目标</h1>
+            </div>
+            <div class="goals-container">
+                <div class="goals-main">
+                    <div id="goalCompletionBanner" class="goal-completion-banner" style="display: none;">
+                        <!-- Completion message will be dynamically added here -->
+                    </div>
+                    <div class="goals-list" id="goalsList">
+                        <!-- Goals will be dynamically added here -->
+                    </div>
+                    <button class="btn-add-goal" id="addGoalBtn">
+                        <i class="fas fa-plus"></i> 添加新目标
+                    </button>
+                </div>
+                <div class="goals-calendar">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Customer Management -->
+        <div id="customers" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-users"></i> 客户名单管理</h1>
+            </div>
+            <div class="customer-tabs">
+                <button class="tab-btn active" data-tab="existing">原有客户</button>
+                <button class="tab-btn" data-tab="family">Family Tree</button>
+                <button class="tab-btn" data-tab="kiv">KIV 名单</button>
+                <button class="tab-btn" data-tab="monthly">Monthly Cake Counting</button>
+                <button class="tab-btn" data-tab="referral">Referral Listing</button>
+            </div>
+            
+            <!-- Existing Customers Tab -->
+            <div id="existing-tab" class="tab-content active">
+                <div class="tab-header">
+                    <h2>原有客户</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchExisting" placeholder="搜索姓名、身份证、保单号码...">
+                        </div>
+                        <button class="btn-add" id="addExistingCustomerBtn">
+                            <i class="fas fa-plus"></i> 添加客户
+                        </button>
+                    </div>
+                </div>
+                <div class="coverage-gap-search">
+                    <h3><i class="fas fa-shield-alt"></i> 保障缺口搜索</h3>
+                    <div class="gap-search-controls">
+                        <div class="gap-search-item">
+                            <label>保障类型</label>
+                            <select id="coverageGapType">
+                                <option value="">选择保障类型</option>
+                                <option value="life">人寿</option>
+                                <option value="illness">疾病</option>
+                                <option value="accident">意外</option>
+                                <option value="medical">医疗</option>
+                                <option value="hospital">住院</option>
+                                <option value="waive">Waive</option>
+                            </select>
+                        </div>
+                        <div class="gap-search-item">
+                            <label>少于金额 (RM)</label>
+                            <input type="number" id="coverageGapAmount" placeholder="例如: 100000" step="0.01" min="0">
+                        </div>
+                        <div class="gap-search-item">
+                            <button class="btn-primary" id="searchCoverageGapBtn">
+                                <i class="fas fa-search"></i> 搜索保障缺口
+                            </button>
+                            <button class="btn-secondary" id="clearCoverageGapBtn" style="display: none;">
+                                <i class="fas fa-times"></i> 清除筛选
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="customers-grid" id="existingCustomersList"></div>
+            </div>
+
+            <!-- Family Tree Tab -->
+            <div id="family-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Family Tree</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchFamily" placeholder="搜索姓名、关系...">
+                        </div>
+                        <button class="btn-add" id="addFamilyMemberBtn">
+                            <i class="fas fa-plus"></i> 添加家庭成员
+                        </button>
+                    </div>
+                </div>
+                <div class="family-tree-container" id="familyTreeList"></div>
+            </div>
+
+            <!-- KIV Tab -->
+            <div id="kiv-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>KIV 名单</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchKIV" placeholder="搜索姓名、保单类型...">
+                        </div>
+                        <button class="btn-add" id="addKIVBtn">
+                            <i class="fas fa-plus"></i> 添加KIV
+                        </button>
+                    </div>
+                </div>
+                <div class="kiv-grid" id="kivList"></div>
+            </div>
+
+            <!-- Monthly Cake Tab -->
+            <div id="monthly-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Monthly Cake Counting</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchMonthly" placeholder="搜索姓名、保单类型...">
+                        </div>
+                        <button class="btn-add" id="addMonthlyBtn">
+                            <i class="fas fa-plus"></i> 添加计划
+                        </button>
+                    </div>
+                </div>
+                <div class="monthly-grid" id="monthlyList"></div>
+            </div>
+
+            <!-- Referral Listing Tab -->
+            <div id="referral-tab" class="tab-content">
+                <div class="tab-header">
+                    <h2>Referral Listing</h2>
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchReferral" placeholder="搜索姓名、转介绍人...">
+                        </div>
+                        <button class="btn-add" id="addReferralBtn">
+                            <i class="fas fa-plus"></i> 添加转介绍
+                        </button>
+                    </div>
+                </div>
+                <div class="referral-grid" id="referralList"></div>
+            </div>
+        </div>
+
+        <!-- Page 3: 3访汇报 -->
+        <div id="visits" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-clipboard-list"></i> 行动策略管理 - 3访汇报</h1>
+            </div>
+            <div class="visits-container">
+                <div class="visits-header">
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchVisits" placeholder="搜索名字、顾客来源、地区...">
+                        </div>
+                        <div class="visit-batch-actions" style="display: flex; gap: 10px; align-items: center;">
+                            <button class="btn-secondary" id="selectAllVisitsBtn" style="display: none;">
+                                <i class="fas fa-check-square"></i> 全选
+                            </button>
+                            <button class="btn-secondary" id="combineVisitsBtn" style="display: none;">
+                                <i class="fas fa-layer-group"></i> 综合
+                            </button>
+                        </div>
+                        <button class="btn-add" id="addVisitBtn">
+                            <i class="fas fa-plus"></i> 添加3访汇报
+                        </button>
+                    </div>
+                </div>
+                <div class="visits-grid" id="visitsList"></div>
+            </div>
+        </div>
+
+        <!-- Page 4: Reminders -->
+        <div id="reminders" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-bell"></i> 注意事项</h1>
+            </div>
+            <div class="reminders-container">
+                <div class="reminder-section">
+                    <h2><i class="fas fa-exclamation-triangle"></i> 遗漏的受益人</h2>
+                    <div id="missingBeneficiaries" class="reminder-list"></div>
+                </div>
+                <div class="reminder-section">
+                    <h2><i class="fas fa-bullseye"></i> 未完成的目标</h2>
+                    <div id="uncompletedGoals" class="reminder-list"></div>
+                </div>
+                <div class="reminder-section">
+                    <h2><i class="fas fa-chart-line"></i> 可开发的市场</h2>
+                    <div id="marketableOpportunities" class="reminder-list"></div>
+                </div>
+                <div class="reminder-section">
+                    <h2><i class="fas fa-calendar-check"></i> KIV顾客见面时间到期</h2>
+                    <div id="kivDueMeetings" class="reminder-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 5: Tools -->
+        <div id="tools" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-tools"></i> 小工具</h1>
+            </div>
+            <div class="tools-container">
+                <div class="tools-sidebar">
+                    <div class="tool-item" data-tool="calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>MINI 计算器</span>
+                    </div>
+                    <div class="tool-item" data-tool="bmi">
+                        <i class="fas fa-weight"></i>
+                        <span>BMI 计算器</span>
+                    </div>
+                    <div class="tool-item" data-tool="lifevalue">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span>身份价值计算器</span>
+                    </div>
+                    <div class="tool-item" data-tool="sync">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>数据同步</span>
+                    </div>
+                    <div class="tool-item" data-tool="backup">
+                        <i class="fas fa-database"></i>
+                        <span>数据备份</span>
+                    </div>
+                    <div class="tool-item" data-tool="check">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>数据检查</span>
+                    </div>
+                </div>
+                <div class="tools-content">
+                    <div id="calculator-tool" class="tool-panel" style="display: none;">
+                        <h2>MINI 计算器</h2>
+                        <button class="btn-open-calculator" id="openCalculatorBtn">
+                            <i class="fas fa-calculator"></i> 打开计算器
+                        </button>
+                    </div>
+                    <div id="bmi-tool" class="tool-panel" style="display: none;">
+                        <h2>BMI 计算器</h2>
+                        <div class="bmi-calculator">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>身高 (cm)</label>
+                                    <input type="number" id="bmiHeight" placeholder="例如: 170" min="1" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label>体重 (kg)</label>
+                                    <input type="number" id="bmiWeight" placeholder="例如: 70" min="1" step="0.1">
+                                </div>
+                            </div>
+                            <button class="btn-primary" id="calculateBMIBtn">计算 BMI</button>
+                            <div id="bmiResult" class="bmi-result" style="display: none;">
+                                <div class="bmi-value">
+                                    <span class="bmi-label">BMI 指数:</span>
+                                    <span class="bmi-number" id="bmiValue"></span>
+                                </div>
+                                <div class="bmi-status" id="bmiStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lifevalue-tool" class="tool-panel" style="display: none;">
+                        <h2>身份价值计算器</h2>
+                        <div class="lifevalue-calculator">
+                            <div class="form-group">
+                                <label>债务</label>
+                                <div class="expense-list" id="debtList">
+                                    <div class="expense-item">
+                                        <input type="text" class="expense-name" placeholder="例如: 车贷" value="车贷">
+                                        <input type="number" class="expense-amount" placeholder="金额 (RM)" step="0.01" min="0">
+                                        <button class="btn-remove-expense" onclick="removeExpenseItem(this)"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    <div class="expense-item">
+                                        <input type="text" class="expense-name" placeholder="例如: 房贷" value="房贷">
+                                        <input type="number" class="expense-amount" placeholder="金额 (RM)" step="0.01" min="0">
+                                        <button class="btn-remove-expense" onclick="removeExpenseItem(this)"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
+                                <button class="btn-add-expense" onclick="addExpenseItem('debtList')">
+                                    <i class="fas fa-plus"></i> 添加债务项
+                                </button>
+                            </div>
+                            <div class="form-group">
+                                <label>孩子教育费 (RM/年)</label>
+                                <input type="number" id="educationExpense" placeholder="0" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>个人生活费 (RM/年)</label>
+                                <input type="number" id="personalExpense" placeholder="0" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>家庭费用 (RM/年)</label>
+                                <input type="number" id="familyExpense" placeholder="0" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>其他费用</label>
+                                <div class="expense-list" id="otherExpenseList">
+                                    <div class="expense-item">
+                                        <input type="text" class="expense-name" placeholder="例如: 保险费">
+                                        <input type="number" class="expense-amount" placeholder="金额 (RM/年)" step="0.01" min="0">
+                                        <button class="btn-remove-expense" onclick="removeExpenseItem(this)"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
+                                <button class="btn-add-expense" onclick="addExpenseItem('otherExpenseList')">
+                                    <i class="fas fa-plus"></i> 添加其他费用
+                                </button>
+                            </div>
+                            <button class="btn-primary" id="calculateLifeValueBtn">计算年收入需求</button>
+                            <div id="lifeValueResult" class="lifevalue-result" style="display: none;">
+                                <div class="result-total">
+                                    <span class="result-label">年收入需求:</span>
+                                    <span class="result-amount" id="lifeValueTotal">RM 0.00</span>
+                                </div>
+                                <div class="result-breakdown" id="lifeValueBreakdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sync-tool" class="tool-panel" style="display: none;">
+                        <h2>数据同步</h2>
+                        <div class="sync-settings">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="autoSyncEnabled" onchange="toggleAutoSync(this.checked)">
+                                    启用自动同步
+                                </label>
+                                <p class="form-hint">开启后，数据将自动同步到云端，可在不同设备间同步</p>
+                            </div>
+                            <div class="form-group">
+                                <label>同步频率</label>
+                                <select id="syncInterval" class="form-control">
+                                    <option value="300000">每5分钟</option>
+                                    <option value="600000">每10分钟</option>
+                                    <option value="1800000">每30分钟</option>
+                                    <option value="3600000">每小时</option>
+                                </select>
+                            </div>
+                            <div class="sync-status" id="syncStatus">
+                                <div class="status-item">
+                                    <span class="status-label">同步状态:</span>
+                                    <span class="status-value" id="syncStatusValue">未启用</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">最后同步:</span>
+                                    <span class="status-value" id="lastSyncTime">-</span>
+                                </div>
+                            </div>
+                            <div class="sync-actions">
+                                <button class="btn-primary" id="manualSyncBtn" onclick="manualSync()">
+                                    <i class="fas fa-sync-alt"></i> 立即同步
+                                </button>
+                                <button class="btn-secondary" id="downloadFromCloudBtn" onclick="downloadFromCloud()">
+                                    <i class="fas fa-download"></i> 从云端下载
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="backup-tool" class="tool-panel" style="display: none;">
+                        <h2>数据备份</h2>
+                        <div class="backup-settings">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="autoBackupEnabled" onchange="toggleAutoBackup(this.checked)">
+                                    启用自动备份
+                                </label>
+                                <p class="form-hint">开启后，系统将定期自动备份数据到本地</p>
+                            </div>
+                            <div class="form-group">
+                                <label>备份频率</label>
+                                <select id="backupInterval" class="form-control">
+                                    <option value="86400000">每天</option>
+                                    <option value="604800000">每周</option>
+                                    <option value="2592000000">每月</option>
+                                </select>
+                            </div>
+                            <div class="backup-status" id="backupStatus">
+                                <div class="status-item">
+                                    <span class="status-label">备份状态:</span>
+                                    <span class="status-value" id="backupStatusValue">未启用</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">最后备份:</span>
+                                    <span class="status-value" id="lastBackupTime">-</span>
+                                </div>
+                            </div>
+                            <div class="backup-actions">
+                                <button class="btn-primary" id="manualBackupBtn" onclick="manualBackup()">
+                                    <i class="fas fa-download"></i> 立即备份
+                                </button>
+                                <button class="btn-secondary" id="restoreBackupBtn" onclick="restoreBackup()">
+                                    <i class="fas fa-upload"></i> 恢复备份
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="check-tool" class="tool-panel" style="display: none;">
+                        <h2>数据检查与修复</h2>
+                        <div class="check-settings">
+                            <p class="form-hint">检查数据完整性，发现并修复潜在问题</p>
+                            <div class="check-actions">
+                                <button class="btn-primary" id="checkDataBtn" onclick="checkDataIntegrity()">
+                                    <i class="fas fa-search"></i> 开始检查
+                                </button>
+                                <button class="btn-secondary" id="fixDataBtn" onclick="fixDataIssues()" style="display: none;">
+                                    <i class="fas fa-wrench"></i> 自动修复
+                                </button>
+                            </div>
+                            <div id="checkResults" class="check-results" style="display: none;">
+                                <h3>检查结果</h3>
+                                <div id="checkResultsContent"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 7: Quadrant -->
+        <div id="quadrant" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-th"></i> 四宫格</h1>
+                <div class="header-actions">
+                    <button class="btn-primary" id="exportQuadrantBtn">
+                        <i class="fas fa-download"></i> 导出PNG
+                    </button>
+                    <button class="btn-secondary" id="updateQuadrantBtn">
+                        <i class="fas fa-sync"></i> 更新数据
+                    </button>
+                </div>
+            </div>
+            <div class="quadrant-container">
+                <!-- Input Section -->
+                <div class="quadrant-input-section">
+                    <div class="quadrant-input-tabs">
+                        <button class="quadrant-tab-btn active" data-tab="preparation">筹备</button>
+                        <button class="quadrant-tab-btn" data-tab="action">行动</button>
+                        <button class="quadrant-tab-btn" data-tab="strategy">策略</button>
+                        <button class="quadrant-tab-btn" data-tab="motivation">动力</button>
+                    </div>
+                    
+                    <!-- Preparation Tab -->
+                    <div id="preparation-tab" class="quadrant-tab-content active">
+                        <div class="form-group">
+                            <label>选择月份</label>
+                            <input type="month" id="preparationMonth" class="form-control">
+                        </div>
+                        <div class="preparation-summary">
+                            <h3>Monthly Cake Counting 保费统计</h3>
+                            <div class="summary-card">
+                                <div class="summary-label">总保费金额</div>
+                                <div class="summary-value" id="totalPremium">RM 0.00</div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>筹备库存</label>
+                            <textarea id="preparationInventory" class="form-control" rows="4" placeholder="填写筹备库存..."></textarea>
+                        </div>
+                        <button class="btn-primary" id="savePreparationBtn">保存筹备数据</button>
+                    </div>
+                    
+                    <!-- Action Tab -->
+                    <div id="action-tab" class="quadrant-tab-content">
+                        <div class="form-group">
+                            <label>目标月份</label>
+                            <input type="month" id="actionMonth" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>目标星期</label>
+                            <input type="number" id="actionWeek" class="form-control" min="1" max="5" placeholder="第几周">
+                        </div>
+                        <div class="action-inputs">
+                            <div class="form-group">
+                                <label>NOA (Number Of Approach)</label>
+                                <input type="number" id="noaInput" class="form-control" min="0" placeholder="目标数额">
+                            </div>
+                            <div class="form-group">
+                                <label>NOP (Number Of Presentations)</label>
+                                <input type="number" id="nopInput" class="form-control" min="0" placeholder="目标数额">
+                            </div>
+                            <div class="form-group">
+                                <label>NOC (Number Of Case)</label>
+                                <input type="number" id="nocInput" class="form-control" min="0" placeholder="目标数额">
+                            </div>
+                            <div class="form-group">
+                                <label>NOR (Number Of Referral)</label>
+                                <input type="number" id="norInput" class="form-control" min="0" placeholder="目标数额">
+                            </div>
+                        </div>
+                        <div class="meet-prospects-section">
+                            <h3>Meet Prospects</h3>
+                            <div id="prospectsList" class="prospects-list"></div>
+                        </div>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>行动方法</label>
+                            <textarea id="actionMethod" class="form-control" rows="4" placeholder="填写行动方法..."></textarea>
+                        </div>
+                        <button class="btn-primary" id="saveActionBtn">保存行动数据</button>
+                    </div>
+                    
+                    <!-- Strategy Tab -->
+                    <div id="strategy-tab" class="quadrant-tab-content">
+                        <div class="strategy-inputs">
+                            <div class="form-group">
+                                <label>打工市场</label>
+                                <input type="number" id="strategyWorker" class="form-control" min="0" placeholder="数额">
+                            </div>
+                            <div class="form-group">
+                                <label>学生市场</label>
+                                <input type="number" id="strategyStudent" class="form-control" min="0" placeholder="数额">
+                            </div>
+                            <div class="form-group">
+                                <label>家庭市场</label>
+                                <input type="number" id="strategyFamily" class="form-control" min="0" placeholder="数额">
+                            </div>
+                            <div class="form-group">
+                                <label>Home Visit</label>
+                                <input type="number" id="strategyHomeVisit" class="form-control" min="0" placeholder="数额">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>策略方向</label>
+                            <textarea id="strategyDirection" class="form-control" rows="4" placeholder="填写策略方向..."></textarea>
+                        </div>
+                        <button class="btn-primary" id="saveStrategyBtn">保存策略数据</button>
+                    </div>
+                    
+                    <!-- Motivation Tab -->
+                    <div id="motivation-tab" class="quadrant-tab-content">
+                        <div class="motivation-goals" id="motivationGoalsList"></div>
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>动力来源</label>
+                            <textarea id="motivationSource" class="form-control" rows="4" placeholder="填写动力来源..."></textarea>
+                        </div>
+                        <button class="btn-primary" id="saveMotivationBtn">保存动力数据</button>
+                    </div>
+                </div>
+                
+                <!-- Display Section -->
+                <div class="quadrant-display-section">
+                    <div class="quadrant-grid" id="quadrantGrid">
+                        <div class="quadrant-cell top-left">
+                            <div class="quadrant-header">筹备</div>
+                            <div class="quadrant-content" id="preparationContent">
+                                <div class="quadrant-month-display" id="preparationMonthDisplay">-</div>
+                                <div class="quadrant-amount" id="preparationAmount">RM 0.00</div>
+                                <div class="quadrant-inventory" id="preparationInventoryDisplay" style="margin-top: 15px; font-size: var(--font-size-sm); color: #7f8c8d; text-align: left; width: 100%; padding: 10px; background: rgba(74, 144, 226, 0.05); border-radius: 8px; white-space: pre-wrap; word-break: break-word;"></div>
+                            </div>
+                        </div>
+                        <div class="quadrant-cell top-right">
+                            <div class="quadrant-header">行动</div>
+                            <div class="quadrant-content" id="actionContent">
+                                <div class="action-items">
+                                    <div class="action-item">
+                                        <span class="action-label">NOA:</span>
+                                        <span class="action-value" id="displayNOA">0</span>
+                                    </div>
+                                    <div class="action-item">
+                                        <span class="action-label">NOP:</span>
+                                        <span class="action-value" id="displayNOP">0</span>
+                                    </div>
+                                    <div class="action-item">
+                                        <span class="action-label">NOC:</span>
+                                        <span class="action-value" id="displayNOC">0</span>
+                                    </div>
+                                    <div class="action-item">
+                                        <span class="action-label">NOR:</span>
+                                        <span class="action-value" id="displayNOR">0</span>
+                                    </div>
+                                </div>
+                                <div class="action-method" id="actionMethodDisplay" style="margin-top: 15px; font-size: var(--font-size-sm); color: #7f8c8d; text-align: left; width: 100%; padding: 10px; background: rgba(74, 144, 226, 0.05); border-radius: 8px; white-space: pre-wrap; word-break: break-word;"></div>
+                            </div>
+                        </div>
+                        <div class="quadrant-cell bottom-left">
+                            <div class="quadrant-header">策略</div>
+                            <div class="quadrant-content" id="strategyContent">
+                                <div class="strategy-markets">
+                                    <div class="strategy-market-item">
+                                        <span class="market-label">打工:</span>
+                                        <span class="market-value" id="displayWorker">0</span>
+                                    </div>
+                                    <div class="strategy-market-item">
+                                        <span class="market-label">学生:</span>
+                                        <span class="market-value" id="displayStudent">0</span>
+                                    </div>
+                                    <div class="strategy-market-item">
+                                        <span class="market-label">家庭:</span>
+                                        <span class="market-value" id="displayFamily">0</span>
+                                    </div>
+                                    <div class="strategy-market-item">
+                                        <span class="market-label">Home Visit:</span>
+                                        <span class="market-value" id="displayHomeVisit">0</span>
+                                    </div>
+                                </div>
+                                <div class="strategy-direction" id="displayStrategyDirection"></div>
+                            </div>
+                        </div>
+                        <div class="quadrant-cell bottom-right">
+                            <div class="quadrant-header">动力</div>
+                            <div class="quadrant-content" id="motivationContent">
+                                <div class="motivation-goals-display" id="motivationGoalsDisplay"></div>
+                                <div class="motivation-source" id="motivationSourceDisplay" style="margin-top: 15px; font-size: var(--font-size-sm); color: #7f8c8d; text-align: left; width: 100%; padding: 10px; background: rgba(255, 107, 53, 0.05); border-radius: 8px; white-space: pre-wrap; word-break: break-word;"></div>
+                            </div>
+                        </div>
+                        <div class="quadrant-center">
+                            <div class="center-month-card">
+                                <div class="center-month-label">月份</div>
+                                <div class="center-month-value" id="centerMonth">-</div>
+                                <div class="center-update-time" id="updateTime">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="goalModalTitle">添加目标</h2>
+            <form id="goalForm">
+                <input type="hidden" id="goalId">
+                <div class="form-group">
+                    <label>目标标题</label>
+                    <div class="goal-type-selector">
+                        <label class="goal-type-option">
+                            <input type="radio" name="goalType" value="supremacy">
+                            <img src="images/Supremacy.png" alt="Supremacy" style="max-width: 60px; max-height: 60px; object-fit: contain;" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                            <span>Supremacy</span>
+                        </label>
+                        <label class="goal-type-option">
+                            <input type="radio" name="goalType" value="mdrt">
+                            <img src="images/MDRT.png" alt="MDRT" style="max-width: 60px; max-height: 60px; object-fit: contain;" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                            <span>MDRT</span>
+                        </label>
+                        <label class="goal-type-option">
+                            <input type="radio" name="goalType" value="gspc">
+                            <img src="images/GSPC.png" alt="GSPC" style="max-width: 60px; max-height: 60px; object-fit: contain;" onerror="this.style.opacity='0.3'; this.alt='图片加载失败';" onload="this.style.opacity='1';">
+                            <span>GSPC</span>
+                        </label>
+                        <label class="goal-type-option">
+                            <input type="radio" name="goalType" value="custom">
+                            <i class="fas fa-edit"></i>
+                            <span>自定义</span>
+                        </label>
+                    </div>
+                    <input type="text" id="customGoalTitle" placeholder="自定义目标标题" style="display:none;">
+                </div>
+                <div class="form-group">
+                    <label>目标数额</label>
+                    <input type="number" id="goalAmount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>目前业绩</label>
+                    <input type="number" id="currentPerformance" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>目标到期日期</label>
+                    <input type="date" id="goalDueDate" required>
+                </div>
+                <div class="form-group">
+                    <label>目标颜色</label>
+                    <input type="color" id="goalColor" value="#4A90E2">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteGoalBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Modal -->
+    <div id="customerModal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <h2 id="customerModalTitle">添加客户</h2>
+            <form id="customerForm">
+                <input type="hidden" id="customerId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Life Assured 姓名</label>
+                        <input type="text" id="lifeAssuredName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Proposer 姓名</label>
+                        <input type="text" id="proposerName" required>
+                    </div>
+                    <div class="form-group" id="relationshipGroup" style="display:none;">
+                        <label>关系</label>
+                        <input type="text" id="relationship">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>身份证号码</label>
+                        <input type="text" id="idNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="age" required>
+                    </div>
+                    <div class="form-group">
+                        <label>联络方式</label>
+                        <input type="tel" id="contact" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>保单类型</label>
+                        <input type="text" id="policyType" required>
+                    </div>
+                    <div class="form-group">
+                        <label>保单号码</label>
+                        <input type="text" id="policyNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label>缴付方式</label>
+                        <select id="paymentMethod" required>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>保费金额</label>
+                        <input type="number" id="premiumAmount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>生效日期</label>
+                        <input type="date" id="effectiveDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>受益人</label>
+                        <select id="beneficiary" required>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>保障内容</label>
+                    <div class="coverage-grid">
+                        <div class="coverage-item">
+                            <label>人寿</label>
+                            <input type="number" id="coverageLife" step="0.01" value="0">
+                        </div>
+                        <div class="coverage-item">
+                            <label>疾病</label>
+                            <input type="number" id="coverageIllness" step="0.01" value="0">
+                        </div>
+                        <div class="coverage-item">
+                            <label>意外</label>
+                            <input type="number" id="coverageAccident" step="0.01" value="0">
+                        </div>
+                        <div class="coverage-item">
+                            <label>医疗</label>
+                            <input type="number" id="coverageMedical" step="0.01" value="0">
+                        </div>
+                        <div class="coverage-item">
+                            <label>住院利益</label>
+                            <input type="number" id="coverageHospital" step="0.01" value="0">
+                        </div>
+                        <div class="coverage-item">
+                            <label>Waive</label>
+                            <input type="number" id="coverageWaive" step="0.01" value="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteCustomerBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+            <div id="relatedPolicies" class="related-policies" style="display:none;">
+                <h3>相关保单</h3>
+                <div id="relatedPoliciesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family Member Modal -->
+    <div id="familyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="familyModalTitle">添加家庭成员</h2>
+            <form id="familyForm">
+                <input type="hidden" id="familyId">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> 所属客户（这个家人是谁的家人）</label>
+                    <select id="parentCustomerSelect" required>
+                        <option value="">-- 选择原有客户 --</option>
+                    </select>
+                    <small style="color: #7f8c8d; font-size: 12px;">选择这个家人属于哪个原有客户</small>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-users"></i> 这个家人是否已经是您的客户？</label>
+                    <select id="existingCustomerSelect">
+                        <option value="">-- 不是现有客户，填写新信息 --</option>
+                    </select>
+                    <small style="color: #7f8c8d; font-size: 12px;">如果是现有客户，选择后会自动填充信息</small>
+                </div>
+                <div class="form-group">
+                    <label>或填写新成员信息</label>
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="familyName">
+                </div>
+                <div class="form-group">
+                    <label>关系</label>
+                    <input type="text" id="familyRelationship" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>性别</label>
+                        <select id="familyGender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="familyAge" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>工作</label>
+                    <input type="text" id="familyWork">
+                </div>
+                <div class="form-group">
+                    <label>手机号码</label>
+                    <input type="tel" id="familyPhone">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteFamilyBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KIV Modal -->
+    <div id="kivModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="kivModalTitle">添加KIV</h2>
+            <form id="kivForm">
+                <input type="hidden" id="kivId">
+                <div class="form-group">
+                    <label>名字</label>
+                    <input type="text" id="kivName" required>
+                </div>
+                <div class="form-group">
+                    <label>保单类型</label>
+                    <input type="text" id="kivPolicyType" required>
+                </div>
+                <div class="form-group">
+                    <label>保费金额</label>
+                    <input type="number" id="kivPremium" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>最后一次见面时间</label>
+                    <input type="datetime-local" id="kivLastMeeting" required>
+                </div>
+                <div class="form-group">
+                    <label>下一次见面时间</label>
+                    <input type="datetime-local" id="kivNextMeeting" required>
+                </div>
+                <div class="form-group">
+                    <label>不能马上成交的原因</label>
+                    <textarea id="kivReason" rows="4" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteKIVBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Monthly Cake Modal -->
+    <div id="monthlyModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="monthlyModalTitle">添加计划</h2>
+            <form id="monthlyForm">
+                <input type="hidden" id="monthlyId">
+                <div class="form-group">
+                    <label>名字</label>
+                    <input type="text" id="monthlyName" required>
+                </div>
+                <div class="form-group">
+                    <label>保单类型</label>
+                    <input type="text" id="monthlyPolicyType" required>
+                </div>
+                <div class="form-group">
+                    <label>保费金额</label>
+                    <input type="number" id="monthlyPremium" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>预约时间</label>
+                    <input type="datetime-local" id="monthlyAppointment" required>
+                </div>
+                <div class="form-group">
+                    <label>Outcome</label>
+                    <textarea id="monthlyOutcome" rows="4"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteMonthlyBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calendar Event Details Modal -->
+    <div id="calendarEventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="calendarEventModalTitle">日期行程</h2>
+            <div id="calendarEventList" class="calendar-event-list">
+                <!-- Events will be dynamically added here -->
+            </div>
+            <div class="calendar-event-actions" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--light-grey);">
+                <button class="btn-primary" id="addCalendarEventBtn" style="width: 100%;">
+                    <i class="fas fa-plus"></i> 添加活动
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Event Form Modal -->
+    <div id="calendarEventFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="calendarEventFormModalTitle">添加活动</h2>
+            <form id="calendarEventForm">
+                <input type="hidden" id="calendarEventId">
+                <input type="hidden" id="calendarEventDate">
+                <div class="form-group">
+                    <label>活动名称</label>
+                    <input type="text" id="calendarEventTitle" required placeholder="例如：客户会议、培训等">
+                </div>
+                <div class="form-group">
+                    <label>活动时间</label>
+                    <input type="datetime-local" id="calendarEventTime" required>
+                </div>
+                <div class="form-group">
+                    <label>活动描述（可选）</label>
+                    <textarea id="calendarEventDescription" rows="3" placeholder="添加活动备注或详情..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>活动颜色</label>
+                    <input type="color" id="calendarEventColor" value="#9B59B6">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteCalendarEventBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reminder Detail Modal -->
+    <div id="reminderDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="reminderDetailModalTitle">提醒详情</h2>
+            <div id="reminderDetailContent" class="reminder-detail-content">
+                <!-- Reminder details will be dynamically added here -->
+            </div>
+            <div class="reminder-detail-actions" style="margin-top: 25px; padding-top: 20px; border-top: 2px solid var(--light-grey);">
+                <button id="reminderGoToBtn" class="btn-primary" style="width: 100%; margin-bottom: 10px;">
+                    <i class="fas fa-arrow-right"></i> 前往相关页面
+                </button>
+                <button id="reminderMoveToMonthlyBtn" class="btn-move-monthly" style="width: 100%; display: none;">
+                    <i class="fas fa-birthday-cake"></i> 转移到 Monthly Cake Counting
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 综合3访汇报 Modal -->
+    <div id="combineVisitsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close">&times;</span>
+            <h2>综合3访汇报</h2>
+            <div id="combinedVisitsContent" style="margin-bottom: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;">
+                <!-- Combined content will be displayed here -->
+            </div>
+            <div class="modal-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" id="copyCombinedVisitsBtn">
+                    <i class="fas fa-copy"></i> 复制到剪贴板
+                </button>
+                <button type="button" class="btn-primary" onclick="closeModal('combineVisitsModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3访汇报 Modal -->
+    <div id="visitModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="visitModalTitle">添加3访汇报</h2>
+            <form id="visitForm">
+                <input type="hidden" id="visitId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="visitDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>名字</label>
+                        <input type="text" id="visitName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>顾客来源</label>
+                        <input type="text" id="visitSource" required>
+                    </div>
+                    <div class="form-group">
+                        <label>OPF</label>
+                        <select id="visitOPF" required>
+                            <option value="">选择OPF</option>
+                            <option value="Open">Open</option>
+                            <option value="Present">Present</option>
+                            <option value="Follow up">Follow up</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="visitAge" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>工作</label>
+                        <input type="text" id="visitWork">
+                    </div>
+                    <div class="form-group">
+                        <label>地区</label>
+                        <input type="text" id="visitArea">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>收入 (RM)</label>
+                        <input type="number" id="visitIncome" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Concept Selling题目</label>
+                        <input type="text" id="visitConcept">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>保费金额 (RM)</label>
+                        <input type="number" id="visitPremium" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>原有保单</label>
+                        <input type="text" id="visitExistingPolicy">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Outcome</label>
+                        <textarea id="visitOutcome" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>转介绍</label>
+                        <select id="visitReferral" required>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="transferToReferralContainer" style="display: none; margin-bottom: 15px;">
+                    <button type="button" class="btn-primary" id="transferToReferralBtn" style="width: 100%;">
+                        <i class="fas fa-arrow-right"></i> 转移到 Referral Listing
+                    </button>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteVisitBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Referral Modal -->
+    <div id="referralModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="referralModalTitle">添加转介绍</h2>
+            <form id="referralForm">
+                <input type="hidden" id="referralId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>名字</label>
+                        <input type="text" id="referralName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="referralAge" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>谁转介绍来的</label>
+                        <input type="text" id="referralFrom" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>见面日期</label>
+                        <input type="date" id="referralFirstMeetingDate">
+                    </div>
+                    <div class="form-group">
+                        <label>最后一次见面日期</label>
+                        <input type="date" id="referralLastMeetingDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Outcome</label>
+                        <textarea id="referralOutcome" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" class="btn-secondary" id="deleteReferralBtn" style="display:none;">删除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calculator Window (Draggable) -->
+    <div id="calculatorWindow" class="calculator-window" style="display: none;">
+        <div class="calculator-header">
+            <span class="calculator-title">计算器</span>
+            <div class="calculator-controls">
+                <button class="calculator-btn-control" id="calculatorMinimizeBtn" title="最小化">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="calculator-btn-control" id="calculatorCloseBtn" title="关闭">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="calculator-body">
+            <div class="calculator-display" id="calculatorDisplay">0</div>
+            <div class="calculator-buttons">
+                <button class="calculator-btn calculator-btn-function" data-action="clear">C</button>
+                <button class="calculator-btn calculator-btn-function" data-action="clearEntry">CE</button>
+                <button class="calculator-btn calculator-btn-function" data-action="backspace">⌫</button>
+                <button class="calculator-btn calculator-btn-operator" data-action="divide">÷</button>
+                
+                <button class="calculator-btn calculator-btn-number" data-value="7">7</button>
+                <button class="calculator-btn calculator-btn-number" data-value="8">8</button>
+                <button class="calculator-btn calculator-btn-number" data-value="9">9</button>
+                <button class="calculator-btn calculator-btn-operator" data-action="multiply">×</button>
+                
+                <button class="calculator-btn calculator-btn-number" data-value="4">4</button>
+                <button class="calculator-btn calculator-btn-number" data-value="5">5</button>
+                <button class="calculator-btn calculator-btn-number" data-value="6">6</button>
+                <button class="calculator-btn calculator-btn-operator" data-action="subtract">−</button>
+                
+                <button class="calculator-btn calculator-btn-number" data-value="1">1</button>
+                <button class="calculator-btn calculator-btn-number" data-value="2">2</button>
+                <button class="calculator-btn calculator-btn-number" data-value="3">3</button>
+                <button class="calculator-btn calculator-btn-operator" data-action="add">+</button>
+                
+                <button class="calculator-btn calculator-btn-number calculator-btn-zero" data-value="0">0</button>
+                <button class="calculator-btn calculator-btn-number" data-action="decimal">.</button>
+                <button class="calculator-btn calculator-btn-operator calculator-btn-equals" data-action="equals">=</button>
+            </div>
+        </div>
+        <div class="calculator-resize-handle"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+        // Firebase 配置 - 请替换为您的 Firebase 项目配置
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // 初始化 Firebase
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                window.firebaseDatabase = firebase.database();
+                console.log('Firebase 初始化成功');
+            } else {
+                console.warn('Firebase SDK 未加载，将使用本地存储');
+                window.firebaseDatabase = null;
+            }
+        } catch (error) {
+            console.warn('Firebase 初始化失败，将使用本地存储:', error);
+            window.firebaseDatabase = null;
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
+
